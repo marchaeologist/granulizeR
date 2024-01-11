@@ -1,0 +1,913 @@
+# needed packages
+library(shiny)
+library(DT)
+library(ggplot2)
+library(Ternary)
+library(dplyr)
+library(ggtern)
+library(shinyjs)
+library(rsconnect)
+library(ggalt)
+
+# model data
+ternary_df <- data.frame(
+  dataset = c("Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "Europe", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa", "South Africa"),
+  method = c("Levallois", "Bifacial", "Discoide", "Laminar", "Laminar", "Discoide", "Discoide", "Discoide", "Discoide", "Levallois", "Levallois", "Levallois", "Bifacial", "Bifacial", "Bifacial", "Bifacial", "Bifacial", "Bifacial", "Bifacial", "Bifacial", "Bifacial", "Bifacial", "Bifacial", "Bifacial", "Discoide", "Discoide", "Discoide", "Discoide", "Discoide", "Discoide", "Discoide", "Discoide", "Discoide", "Discoide", "Laminar", "Laminar", "Laminar", "Laminar", "Laminar", "Laminar", "Laminar", "Laminar", "Laminar", "Laminar", "Laminar", "Laminar", "Laminar", "Laminar_Levallois", "Laminar_Levallois", "Laminar_Levallois", "Laminar_Levallois", "Laminar_Levallois", "Laminar_Levallois", "Laminar_Levallois", "Laminar_Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Bipolar", "Bipolar", "Bipolar", "Discoide", "Discoide", "Discoide", "Discoide", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Bipolar", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Centripetal", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Levallois", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking", "Unidirectional flaking"),
+  raw_material = c("Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Vein quartz", "Quartzite", "Quartzite", "Quartzite", "Quartzite", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Flint", "Quartzite", "Quartzite", "Quartzite", "Vein quartz", "Quartzite", "Quartzite", "Quartzite", "Chalcedony", "Chalcedony", "Chalcedony", "Chalcedony", "Chalcedony", "Chalcedony", "Chalcedony", "Chalcedony", "Crystal quartz", "Crystal quartz", "Crystal quartz", "Crystal quartz", "Jaspe", "Jaspe", "Jaspe", "Jaspe", "Jaspe", "Jaspe", "Jaspe", "Jaspe", "Jaspe", "Jaspe", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Vein quartz", "Quartzite", "Quartzite", "Quartzite", "Quartzite", "Quartzite", "Quartzite", "Quartzite", "Quartzite", "Quartzite", "Quartzite", "Rhyolite", "Rhyolite", "Rhyolite", "Rhyolite", "Rhyolite", "Rhyolite", "Rhyolite", "Rhyolite", "Rhyolite", "Rhyolite", "Chalcedony", "Chalcedony", "Chalcedony", "Chalcedony", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Chalcedony", "Chalcedony", "Chalcedony", "Chalcedony", "Chalcedony", "Chalcedony", "Chalcedony", "Chalcedony", "Chalcedony", "Chalcedony", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Hornfels", "Jaspe", "Jaspe", "Jaspe", "Jaspe", "Jaspe"),
+  knapper = c("B. Aubry", "J. Pelegrin", "J. Pelegrin", "J. Pelegrin", "J. Pelegrin", "L. Bourguignon", "L. Bourguignon", "L. Bourguignon", "L. Bourguignon", "L. Bourguignon", "L. Bourguignon", "L. Bourguignon", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "M. Brenet", "V. Mourre", "V.Mourre", "V.Mourre", "V.Mourre", "V.Mourre", "V.Mourre", "V.Mourre", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena", "P. de la Pena"),
+  n2 = c(2583.064, 1287.4905, 246.015, 719.0028, 171.0135, 254.9922, 127.0077, 178.0002, 215.9978, 896.9976, 1374.9416, 911.9565, 651.9755, 1096.9329, 725.9916, 478.9875, 253.0188, 833.9646, 627.0282, 424.018, 534.9645, 988.9363, 449.9714, 546.984, 124.9942, 247.0014, 184.0063, 181.0122, 196.992, 748.02, 346.9996, 682.9552, 206.0163, 159.0085, 623.972, 1001.052, 2958.984, 316.9936, 584.018, 1478.9011, 1607.0514, 567.0018, 534.0355, 588.9996, 606.9875, 474.02, 678.0014, 772.968, 966.0205, 751.0327, 1542.0104, 651.0372, 983.97, 2058.0888, 2019.8548, 501.963, 886.9751, 638.0355, 723.9825, 1692.9828, 1395.992, 177.0102, 178.011, 140.9953, 187.9945, 14.9988, 163.0072, 83.9952, 86, 108, 148, 130, 138, 49, 109, 142, 116, 35, 45, 58, 60, 30, 19, 50, 38, 19, 50, 121, 72, 22, 136, 105, 160, 69, 32, 20, 33, 42, 42, 30, 41, 31, 21, 210, 157, 127, 80, 124, 69, 72, 163, 122, 115, 110, 59, 225, 214, 201, 129, 158, 127, 130, 78, 50, 38, 49, 60, 40, 30, 80, 30, 38, 250, 122, 44, 35, 62, 74, 115, 76, 64, 32, 23, 39, 63, 29, 45, 110, 38, 56, 74, 250, 250, 33, 140, 147, 118, 85, 66, 150, 94, 190, 57, 67, 88, 40, 13, 31, 30, 74, 18, 20, 43, 57, 69, 122, 126, 112, 96, 110, 48, 26, 191, 133, 29),
+  n4 = c(242.8998, 220.9707, 34.9965, 107.9496, 35.014, 31.9884, 11.0048, 29.0019, 26.9872, 145.008, 196.0962, 209.9279, 115.995, 158.0558, 126.0004, 56.0325, 20.0196, 123.018, 92.9907, 67.022, 75.9906, 157.0228, 72.9805, 98.9964, 14.0068, 45.0076, 23.987, 38.9958, 23.9856, 114.0048, 48.9836, 83.0072, 31.0156, 28.9905, 95.034, 143.0676, 417.8916, 43.0032, 96.031, 179.9699, 207.0788, 78.9891, 66.0185, 86.9652, 76.0375, 61.0335, 67.9852, 101.008, 140.368, 111.9545, 237.9464, 112.0185, 139.055, 322.9456, 279.1264, 81.004, 130.055, 104.9545, 96.048, 240.9588, 190.0145, 28.0053, 32.994, 28.0067, 24.9985, 4.9996, 30.0144, 21.0064, 28, 25, 140, 39, 35, 23, 17, 38, 63, 13, 15, 9, 32, 24, 6, 34, 14, 9, 18, 33, 19, 4, 43, 69, 90, 27, 13, 9, 6, 16, 10, 13, 20, 22, 18, 72, 94, 51, 30, 29, 42, 25, 152, 110, 70, 41, 27, 108, 54, 200, 63, 109, 82, 94, 20, 37, 23, 25, 55, 11, 23, 50, 10, 26, 182, 137, 18, 21, 36, 35, 65, 30, 30, 8, 16, 29, 20, 15, 43, 45, 22, 41, 65, 78, 78, 21, 70, 98, 73, 69, 31, 44, 29, 100, 12, 39, 37, 17, 8, 14, 12, 26, 20, 14, 17, 26, 10, 46, 51, 25, 50, 28, 14, 6, 94, 98, 9),
+  n5 = c(301.9038, 313.092, 56.0175, 138.0168, 45.994, 53.985, 28.0007, 47.0069, 42.9858, 206.9784, 324.9712, 280.9352, 175.978, 234.038, 171.972, 133.032, 82.008, 176.001, 137.9862, 85.002, 125.0193, 203.962, 85.0046, 120.9528, 25.996, 57.0122, 46.9914, 46.9989, 43.9888, 143.052, 78.0068, 136.0424, 71.0094, 34.9894, 159.988, 166.9356, 638.085, 81.9888, 131.987, 251.0052, 335.0618, 124.0053, 128.0335, 124.9794, 121.0125, 93.023, 149.996, 129.042, 179.422, 149.0153, 316.96, 157.0305, 223.01, 444.8928, 404.0296, 115.038, 219.04, 129.0205, 143.9685, 308.0124, 274.04, 26.9874, 34.992, 37.9911, 28.9867, 4.9996, 48.0112, 22.9976, 70, 40, 55, 55, 64, 27, 32, 57, 101, 28, 27, 20, 22, 8, 9, 40, 14, 9, 12, 31, 21, 6, 58, 62, 98, 37, 14, 8, 14, 20, 27, 20, 49, 48, 24, 142, 167, 82, 42, 64, 33, 38, 111, 106, 79, 72, 23, 157, 119, 186, 46, 101, 106, 93, 44, 24, 32, 21, 61, 11, 34, 57, 21, 19, 184, 150, 23, 25, 34, 84, 107, 45, 40, 11, 21, 37, 40, 33, 48, 98, 24, 52, 65, 180, 143, 25, 83, 96, 109, 82, 31, 70, 51, 110, 39, 55, 76, 29, 9, 23, 29, 31, 23, 29, 24, 50, 61, 82, 90, 38, 54, 78, 35, 7, 117, 106, 17),
+  n10 = c(109.1574, 124.0326, 16.016, 51.9912, 38.003, 9.9918, 11.0048, 9.9997, 25.0166, 64.98, 104.9558, 103.9584, 73.0455, 82.0736, 65.9788, 38.9697, 27.0144, 66.0156, 38.9961, 23.994, 40.0155, 35.0647, 25.9772, 39.9645, 16.9944, 20.9984, 18.9873, 27.9954, 20.0032, 51.9792, 34.9724, 68.9864, 32.0173, 10.9938, 42.018, 65.988, 215.8674, 37.9936, 50.018, 94.0234, 103.0782, 49.9899, 32.028, 53.9784, 46.025, 41.9905, 56.005, 37.022, 82.2115, 59.0105, 103.012, 58.0041, 56.985, 165.1496, 163.0192, 33.033, 69.9559, 42.975, 39.0195, 102.0276, 94.1005, 18.009, 12.987, 10.0073, 19.9988, 0, 33.004, 13.9992, 10, 9, 18, 17, 22, 14, 13, 12, 41, 12, 12, 8, 9, 11, 10, 9, 4, 5, 3, 17, 13, 6, 16, 17, 37, 9, 6, 5, 4, 10, 10, 7, 22, 20, 14, 83, 50, 35, 31, 28, 23, 35, 39, 32, 19, 19, 13, 60, 29, 62, 26, 24, 31, 45, 27, 18, 19, 17, 34, 8, 12, 30, 8, 19, 80, 74, 24, 13, 21, 42, 78, 26, 17, 9, 12, 20, 24, 20, 32, 35, 32, 42, 45, 78, 100, 15, 38, 72, 40, 26, 16, 41, 26, 89, 27, 34, 31, 18, 4, 21, 15, 26, 9, 9, 18, 16, 41, 33, 35, 24, 17, 38, 13, 3, 47, 46, 4),
+  n20 = c(40.975, 61.0128, 32.032, 27.0396, 15.0365, 15.006, 3.982, 13.019, 22.9792, 54.036, 60.829, 39.9126, 28.1105, 31.8997, 34.0572, 16.0506, 20.0196, 19.0008, 11.9988, 19.964, 1.0101, 12.0142, 9.0663, 155.9097, 11.9892, 16.019, 14.9991, 13.9977, 19, 35.0532, 47.0376, 45.0088, 30.9785, 16.9927, 18.988, 26.9568, 95.172, 16.0208, 27.946, 66.8933, 53.9604, 23.0139, 24.963, 26.901, 25.025, 15.07, 22.1098, 29.96, 50.091, 31.987, 64.0712, 45.012, 46.98, 73.2296, 65.97, 39.039, 62.974, 40.0145, 31.9815, 68.0184, 61.0545, 10.9881, 10.989, 11.9996, 26.9926, 4.002, 21.9928, 10.0016, 2, 1, 3, 4, 8, 0, 0, 3, 5, 3, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 5, 2, 7, 2, 0, 0, 0, 1, 1, 4, 13, 17, 12, 48, 50, 23, 17, 21, 13, 22, 27, 7, 10, 4, 8, 17, 6, 22, 22, 11, 13, 5, 18, 7, 11, 20, 25, 9, 18, 22, 8, 11, 75, 64, 4, 21, 27, 27, 33, 7, 12, 3, 6, 5, 12, 0, 12, 32, 8, 22, 36, 70, 61, 10, 17, 21, 38, 12, 13, 20, 21, 66, 3, 17, 15, 4, 1, 10, 5, 3, 11, 2, 9, 13, 20, 16, 30, 11, 17, 30, 2, 1, 22, 16, 1),
+  n4_5 = c(544.8036, 534.0627, 91.014, 245.9664, 81.008, 85.9734, 39.0055, 76.0088, 69.973, 351.9864, 521.0674, 490.8631, 291.973, 392.0938, 297.9724, 189.0645, 102.0276, 299.019, 230.9769, 152.024, 201.0099, 360.9848, 157.9851, 219.9492, 40.0028, 102.0198, 70.9784, 85.9947, 67.9744, 257.0568, 126.9904, 219.0496, 102.025, 63.9799, 255.022, 310.0032, 1055.9766, 124.992, 228.018, 430.9751, 542.1406, 202.9944, 194.052, 211.9446, 197.05, 154.0565, 217.9812, 230.05, 319.79, 260.9698, 554.9064, 269.049, 362.065, 767.8384, 683.156, 196.042, 349.095, 233.975, 240.0165, 548.9712, 464.0545, 54.9927, 67.986, 65.9978, 53.9852, 9.9992, 78.0256, 44.004, 98, 65, 195, 94, 99, 50, 49, 95, 164, 41, 42, 29, 54, 32, 15, 74, 28, 18, 30, 64, 40, 10, 101, 131, 188, 64, 27, 17, 20, 36, 37, 33, 69, 70, 42, 214, 261, 133, 72, 93, 75, 63, 263, 216, 149, 113, 50, 265, 173, 386, 109, 210, 188, 187, 64, 61, 55, 46, 116, 22, 57, 107, 31, 45, 366, 287, 41, 46, 70, 119, 172, 75, 70, 19, 37, 66, 60, 48, 91, 143, 46, 93, 130, 258, 221, 46, 153, 194, 182, 151, 62, 114, 80, 210, 51, 94, 113, 46, 17, 37, 41, 57, 43, 43, 41, 76, 71, 128, 141, 63, 104, 106, 49, 13, 211, 204, 26),
+  nsup10 = c(150.1324, 185.0454, 48.048, 79.0308, 53.0395, 24.9978, 14.9868, 23.0187, 47.9958, 119.016, 165.7848, 143.871, 101.156, 113.9733, 100.036, 55.0203, 47.034, 85.0164, 50.9949, 43.958, 41.0256, 47.0789, 35.0435, 195.8742, 28.9836, 37.0174, 33.9864, 41.9931, 39.0032, 87.0324, 82.01, 113.9952, 62.9958, 27.9865, 61.006, 92.9448, 311.0394, 54.0144, 77.964, 160.9167, 157.0386, 73.0038, 56.991, 80.8794, 71.05, 57.0605, 78.1148, 66.982, 132.3025, 90.9975, 167.0832, 103.0161, 103.965, 238.3792, 228.9892, 72.072, 132.9299, 82.9895, 71.001, 170.046, 155.155, 28.9971, 23.976, 22.0069, 46.9914, 4.002, 54.9968, 24.0008, 12, 10, 21, 21, 30, 14, 13, 15, 46, 15, 13, 8, 9, 11, 10, 9, 5, 5, 4, 18, 13, 6, 21, 19, 44, 11, 6, 5, 4, 11, 11, 11, 35, 37, 26, 131, 100, 58, 48, 49, 36, 57, 66, 39, 29, 23, 21, 77, 35, 84, 48, 35, 44, 50, 45, 25, 30, 37, 59, 17, 30, 52, 16, 30, 155, 138, 28, 34, 48, 69, 111, 33, 29, 12, 18, 25, 36, 20, 44, 67, 40, 64, 81, 148, 161, 25, 55, 93, 78, 38, 29, 61, 47, 155, 30, 51, 46, 22, 5, 31, 20, 29, 20, 11, 27, 29, 61, 49, 65, 35, 34, 68, 15, 4, 69, 62, 5),
+  n2_4 = c(2825.9638, 1508.4612, 281.0115, 826.9524, 206.0275, 286.9806, 138.0125, 207.0021, 242.985, 1042.0056, 1571.0378, 1121.8844, 767.9705, 1254.9887, 851.992, 535.02, 273.0384, 956.9826, 720.0189, 491.04, 610.9551, 1145.9591, 522.9519, 645.9804, 139.001, 292.009, 207.9933, 220.008, 220.9776, 862.0248, 395.9832, 765.9624, 237.0319, 187.999, 719.006, 1144.1196, 3376.8756, 359.9968, 680.049, 1658.871, 1814.1302, 645.9909, 600.054, 675.9648, 683.025, 535.0535, 745.9866, 873.976, 1106.3885, 862.9872, 1779.9568, 763.0557, 1123.025, 2381.0344, 2298.9812, 582.967, 1017.0301, 742.99, 820.0305, 1933.9416, 1586.0065, 205.0155, 211.005, 169.002, 212.993, 19.9984, 193.0216, 105.0016, 114, 133, 288, 169, 173, 72, 126, 180, 179, 48, 60, 67, 92, 54, 25, 84, 52, 28, 68, 154, 91, 26, 179, 174, 250, 96, 45, 29, 39, 58, 52, 43, 61, 53, 39, 282, 251, 178, 110, 153, 111, 97, 315, 232, 185, 151, 86, 333, 268, 401, 192, 267, 209, 224, 98, 87, 61, 74, 115, 51, 53, 130, 40, 64, 432, 259, 62, 56, 98, 109, 180, 106, 94, 40, 39, 68, 83, 44, 88, 155, 60, 97, 139, 328, 328, 54, 210, 245, 191, 154, 97, 194, 123, 290, 69, 106, 125, 57, 21, 45, 42, 100, 38, 34, 60, 83, 79, 168, 177, 137, 146, 138, 62, 32, 285, 231, 38),
+  n2_4_5 = c(3127.8676, 1821.5532, 337.029, 964.9692, 252.0215, 340.9656, 166.0132, 254.009, 285.9708, 1248.984, 1896.009, 1402.8196, 943.9485, 1489.0267, 1023.964, 668.052, 355.0464, 1132.9836, 858.0051, 576.042, 735.9744, 1349.9211, 607.9565, 766.9332, 164.997, 349.0212, 254.9847, 267.0069, 264.9664, 1005.0768, 473.99, 902.0048, 308.0413, 222.9884, 878.994, 1311.0552, 4014.9606, 441.9856, 812.036, 1909.8762, 2149.192, 769.9962, 728.0875, 800.9442, 804.0375, 628.0765, 895.9826, 1003.018, 1285.8105, 1012.0025, 2096.9168, 920.0862, 1346.035, 2825.9272, 2703.0108, 698.005, 1236.0701, 872.0105, 963.999, 2241.954, 1860.0465, 232.0029, 245.997, 206.9931, 241.9797, 24.998, 241.0328, 127.9992, 184, 173, 343, 224, 237, 99, 158, 237, 280, 76, 87, 87, 114, 62, 34, 124, 66, 37, 80, 185, 112, 32, 237, 236, 348, 133, 59, 37, 53, 78, 79, 63, 110, 101, 63, 424, 418, 260, 152, 217, 144, 135, 426, 338, 264, 223, 109, 490, 387, 587, 238, 368, 315, 317, 142, 111, 93, 95, 176, 62, 87, 187, 61, 83, 616, 409, 85, 81, 132, 193, 287, 151, 134, 51, 60, 105, 123, 77, 136, 253, 84, 149, 204, 508, 471, 79, 293, 341, 300, 236, 128, 264, 174, 400, 108, 161, 201, 86, 30, 68, 71, 131, 61, 63, 84, 133, 140, 250, 267, 175, 200, 216, 97, 39, 402, 337, 55),
+  n4_5_10 = c(653.961, 658.0953, 107.03, 297.9576, 119.011, 95.9652, 50.0103, 86.0085, 94.9896, 416.9664, 626.0232, 594.8215, 365.0185, 474.1674, 363.9512, 228.0342, 129.042, 365.0346, 269.973, 176.018, 241.0254, 396.0495, 183.9623, 259.9137, 56.9972, 123.0182, 89.9657, 113.9901, 87.9776, 309.036, 161.9628, 288.036, 134.0423, 74.9737, 297.04, 375.9912, 1271.844, 162.9856, 278.036, 524.9985, 645.2188, 252.9843, 226.08, 265.923, 243.075, 196.047, 273.9862, 267.072, 402.0015, 319.9803, 657.9184, 327.0531, 419.05, 932.988, 846.1752, 229.075, 419.0509, 276.95, 279.036, 650.9988, 558.155, 73.0017, 80.973, 76.0051, 73.984, 9.9992, 111.0296, 58.0032, 108, 74, 213, 111, 121, 64, 62, 107, 205, 53, 54, 37, 63, 43, 25, 83, 32, 23, 33, 81, 53, 16, 117, 148, 225, 73, 33, 22, 24, 46, 47, 40, 91, 90, 56, 297, 311, 168, 103, 121, 98, 98, 302, 248, 168, 132, 63, 325, 202, 448, 135, 234, 219, 232, 91, 79, 74, 63, 150, 30, 69, 137, 39, 64, 446, 361, 65, 59, 91, 161, 250, 101, 87, 28, 49, 86, 84, 68, 123, 178, 78, 135, 175, 336, 321, 61, 191, 266, 222, 177, 78, 155, 106, 299, 78, 128, 144, 64, 21, 58, 56, 83, 52, 52, 59, 92, 112, 161, 176, 87, 121, 144, 62, 16, 258, 250, 30),
+  n5_10 = c(411.0612, 437.1246, 72.0335, 190.008, 83.997, 63.9768, 39.0055, 57.0066, 68.0024, 271.9584, 429.927, 384.8936, 249.0235, 316.1116, 237.9508, 172.0017, 109.0224, 242.0166, 176.9823, 108.996, 165.0348, 239.0267, 110.9818, 160.9173, 42.9904, 78.0106, 65.9787, 74.9943, 63.992, 195.0312, 112.9792, 205.0288, 103.0267, 45.9832, 202.006, 232.9236, 853.9524, 119.9824, 182.005, 345.0286, 438.14, 173.9952, 160.0615, 178.9578, 167.0375, 135.0135, 206.001, 166.064, 261.6335, 208.0258, 419.972, 215.0346, 279.995, 610.0424, 567.0488, 148.071, 288.9959, 171.9955, 182.988, 410.04, 368.1405, 44.9964, 47.979, 47.9984, 48.9855, 4.9996, 81.0152, 36.9968, 80, 49, 73, 72, 86, 41, 45, 69, 142, 40, 39, 28, 31, 19, 19, 49, 18, 14, 15, 48, 34, 12, 74, 79, 135, 46, 20, 13, 18, 30, 37, 27, 71, 68, 38, 225, 217, 117, 73, 92, 56, 73, 150, 138, 98, 91, 36, 217, 148, 248, 72, 125, 137, 138, 71, 42, 51, 38, 95, 19, 46, 87, 29, 38, 264, 224, 47, 38, 55, 126, 185, 71, 57, 20, 33, 57, 64, 53, 80, 133, 56, 94, 110, 258, 243, 40, 121, 168, 149, 108, 47, 111, 77, 199, 66, 89, 107, 47, 13, 44, 44, 57, 32, 38, 42, 66, 102, 115, 125, 62, 71, 116, 48, 10, 164, 152, 21)
+)
+
+example_file_mst <- data.frame(
+  UL = c("AII", "AII", "AII", "AII", "AII", "AII", "AII", "AII", "AII", "AIII", "AIII", "AIII", "AIII", "AIII", "AIII", "AIII", "AIII", "AIII", "AIII", "AIII", "AIII", "AIII", "AIV", "AIV", "AIV", "AIV", "AIV", "AIV", "AIV", "AIV", "AIV"),
+  sub_UL = c("a", "a", "a", "a", "a", "b", "b", "b", "b", "a", "a", "a", "a", "a", "a", "a", "a", "b", "b", "b", "b", "b", "a", "a", "a", "a", "a", "b", "b", "b", "b"),
+  dec = as.factor(c(7, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 38, 40, 41, 42, 43)),
+  count_sieve_2mm = c(366, 1253, 1959, 1646, 1249, 1555, 2530, 2402, 2636, 1393, 1489, 1783, 3055, 3422, 5751, 5285, 9176, 19036, 14317, 1825, 5236, 11676, 7687, 6678, 6966, 6812, 6802, 6197, 5573, 2643, 3219),
+  count_sieve_4mm = c(73, 298, 544, 536, 453, 527, 846, 737, 1331, 373, 515, 525, 831, 758, 992, 1432, 2134, 5393, 3445, 448, 1597, 2737, 1981, 1627, 1821, 1841, 1582, 1370, 1863, 765, 970),
+  count_sieve_10mm = c(33, 57, 102, 89, 116, 83, 183, 186, 183, 101, 124, 101, 138, 83, 143, 228, 406, 636, 548, 104, 281, 661, 307, 311, 416, 336, 342, 266, 442, 194, 214)
+)
+
+
+ui <- tagList(
+  useShinyjs(),
+  navbarPage(
+    p(strong("granulizeR"), "beta 1.0"),
+    tabPanel(
+      "Presentation",
+      mainPanel(
+        fluidRow(
+          column(12,
+            align = "center",
+            tags$img(
+              src = "hex_granulizeR.png",
+              height = 200
+            ),
+          )
+        ),
+        h3(strong("Presentation")),
+        hr(),
+        align = "justify",
+        p(style = "text-align: justify;", "GranulizeR is a shiny application dedicated to the particle size distribution analysis of archaeological lithic remains. It uses Lenoble (2005) method with additionnal data from Bertran et al (2006, 2012) and de la Pena et al (2022)."),
+        p("A dedicated article is available", strong("here"), "."),
+        tags$br(),
+        p("The application contains three panels:"),
+        tags$li("The", strong("'Ternary that!"), "panel allows to upload your data and to plot your data in a ternary diagram with reference knapping débitages."),
+        tags$li("The", strong("'Tutorial'"), "panel contains a short tutorial. This panel is in progress."),
+        tags$li("The", strong("'Bibliography'"), "panel contains the bibliography cited in the application."),
+        hr(),
+      )
+    ),
+    tabPanel(
+      "Ternary that!",
+      sidebarPanel(
+        fileInput("user_file",
+          "Upload your data file (.csv)",
+          multiple = FALSE,
+          accept = ".csv"
+        ),
+        radioButtons("sep",
+          "Column separator",
+          choices = c(Comma = ",", Semicolon = ";", Tab = "\t"),
+          selected = ";", inline = TRUE
+        ),
+        tags$br(),
+        radioButtons("decimal", "Decimal separator",
+          choices = c(Comma = ",", Point = "."),
+          selected = ",",
+          inline = TRUE
+        ),
+        hr(),
+        h5(strong("Manage your data")),
+        uiOutput("left_apex"),
+        uiOutput("right_apex"),
+        uiOutput("top_apex"),
+        uiOutput("category1"),
+        uiOutput("category2"),
+        uiOutput("label"),
+        hr(),
+        h5(strong("Example file")),
+        downloadLink("example_file", "Example file"),
+      ),
+      mainPanel(
+        tabsetPanel(
+          tabPanel(
+            "Ternary diagram",
+            h5(strong("View of the first line of your data file")),
+            tableOutput("files"),
+            hr(),
+            h5(strong("Create your ternary diagram by selecting in the left sidebar the variables you want to display")),
+            tags$br(),
+            fluidRow(
+              column(6, ),
+              column(
+                6,
+                align = "left",
+                radioButtons("stat",
+                  "Type of stat used",
+                  choices = c("Mahalanobis", "convex hull"),
+                  selected = "Mahalanobis",
+                  inline = TRUE
+                )
+              )
+            ),
+            plotOutput("ternary"),
+            hr(),
+            h5(strong("Build your model")),
+            tags$br(),
+            fluidRow(
+              column(
+                4,
+                radioButtons("model_left",
+                  "Left apex 'A' of the triangle",
+                  choices = c(
+                    "2 mm",
+                    "4 mm",
+                    "5 mm"
+                  )
+                )
+              ),
+              column(
+                4,
+                uiOutput("model_right")
+              ),
+              column(
+                4,
+                uiOutput("model_top")
+              )
+            ),
+            tags$br(),
+            fluidRow(
+              column(
+                4,
+                checkboxGroupInput("datafile",
+                  "Select a dataset",
+                  choices = unique(ternary_df$dataset),
+                  selected = "Europe"
+                ),
+              ),
+              column(
+                4,
+                uiOutput("checkbox"),
+              ),
+              column(
+                4,
+                uiOutput("checkbox2"),
+              )
+            ),
+            # uiOutput("checkbox3"),
+            hr(),
+            h5(strong("Manage your figure")),
+            tags$br(),
+            fluidRow(
+              column(
+                4,
+                radioButtons(
+                  inputId = "facet",
+                  label = "How many categories?",
+                  choices = c("0", "1", "2"),
+                  inline = FALSE
+                )
+              ),
+              column(
+                4,
+                radioButtons(
+                  inputId = "label",
+                  label = "Do you have labels?",
+                  choices = c("no", "yes"),
+                  inline = FALSE
+                )
+              ),
+              column(
+                4,
+                radioButtons(
+                  inputId = "file_format",
+                  label = "Select a file format & download",
+                  choices = c("pdf", "png", "jpeg"),
+                  inline = FALSE
+                ),
+                downloadButton("downloadPlot", "Download"),
+              )
+            ),
+            hr(),
+            tags$br()
+          ),
+          tabPanel(
+            "Model data",
+            h5(strong("View of the data you used to build the particle size distribution reference model")),
+            dataTableOutput("table"),
+            hr()
+          )
+        )
+      )
+    ),
+    tabPanel(
+      "Tutorial",
+      mainPanel(
+        fluidRow(
+          column(12,
+            align = "center",
+            tags$img(
+              src = "hex_granulizeR.png",
+              height = 200
+            ),
+          )
+        ),
+        tags$br(),
+        h3(strong("Tutorial")),
+        hr(),
+        tags$br(),
+        h5("Work in progress. A short tutorial and a video will be available soon."),
+        tags$br(),
+        hr()
+      )
+    ),
+    tabPanel(
+      "Bibliography",
+      mainPanel(
+        fluidRow(
+          column(12,
+            align = "center",
+            tags$img(
+              src = "hex_granulizeR.png",
+              height = 200
+            ),
+          )
+        ),
+        tags$br(),
+        h3(strong("Bibliography")),
+        hr(),
+        tags$br(),
+        align = "justify",
+        h5("Bertran P., Claud É., Detrain L., Lenoble A., Masson B., Vallin L. 2006 - Composition granulométrique des assemblages lithiques, application à l’étude taphonomique des sites paléolithiques, PALEO, n° 18, p. 7-36."),
+        h5("Bertran P., Lenoble A., Todisco D., Desrosiers P., Sorensen M. 2012 - Practicle size distribution of lithic assemblages and taphonomy of Palaeolithics sites, Journal of Archaeological Science, n° 39 (10), p. 3148-3166."),
+        h5("de la Peña, P., Thomas, M., Molefyane T. 2022 - Particle size distribution: An experimental study using southern African redution methods and raw materials. PLoS ONE, 17 (12)."),
+        h5("Lenoble A. (2005) - Ruissellement et formation des sites préhistoriques: référentiel actualiste et exemples d’application au fossile, British Archaeological Report"),
+        h5("Mahalanobis P.C. (1936) - On the generalized distance in statistics, Sankhyā: The Indian Journal of Statistics, Series A, n°80"),
+        tags$br(),
+        hr()
+      )
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  # get the user data
+  df <- reactive({
+    req(!is.null(input$user_file))
+
+    inFile <- input$user_file
+
+    if (input$decimal == ".") {
+      data <- read.csv(inFile$datapath, sep = input$sep)
+    } else {
+      data <- read.csv2(inFile$datapath, sep = input$sep)
+    }
+
+    return(data)
+  })
+
+
+  output$top_apex <- renderUI({
+    df_local <- req(df())
+    selectInput("count_top", "Top apex 'C' of the triangle",
+      choices = c("NULL", names(df_local)),
+      selected = "NULL"
+    )
+  })
+
+
+  output$left_apex <- renderUI({
+    df_local <- req(df())
+    selectInput("count_left", "Left 'A' apex of the triangle",
+      choices = c("NULL", names(df_local)),
+      selected = "NULL"
+    )
+  })
+
+
+  output$right_apex <- renderUI({
+    df_local <- req(df())
+    selectInput("count_right", "Right apex  'B' of the triangle",
+      choices = c("NULL", names(df_local)),
+      selected = "NULL"
+    )
+  })
+
+
+  # output$n10 <- renderUI({
+  #   df_local <- req(df())
+  #   selectInput("count10","10 mm counts",
+  #               choices=c("NULL", names(df_local)),
+  #               selected = "NULL")
+  # })
+  #
+  # output$n20 <- renderUI({
+  #   df_local <- req(df())
+  #   selectInput("count20","20 mm counts",
+  #               choices=c("NULL", names(df_local)),
+  #               selected = "NULL")
+  # })
+
+
+  output$category1 <- renderUI({
+    df_local <- req(df())
+    selectInput("cat1", "Select a first category (i.e. level, squares)",
+      choices = c("NULL", names(df_local)),
+      selected = "NULL"
+    )
+  })
+
+
+  output$category2 <- renderUI({
+    df_local <- req(df())
+    selectInput("cat2", "Select a second category (i.e. level, squares)",
+      choices = c("NULL", names(df_local)),
+      selected = "NULL"
+    )
+  })
+
+
+  output$label <- renderUI({
+    df_local <- req(df())
+    selectInput("lab", "Select point labels (i.e. décapages)",
+      choices = c("NULL", names(df_local)),
+      selected = "NULL"
+    )
+  })
+
+
+  # function to download the file if angle only
+  output$example_file <- downloadHandler(
+    filename = function() {
+      paste("Example file", ".csv")
+    },
+    content = function(file) {
+      write.csv2(example_file_mst, file, row.names = FALSE, fileEncoding = "UTF-8")
+    }
+  )
+
+
+  output$files <- renderTable({
+    req(input$user_file)
+    head(df(), n = 1)
+  })
+
+
+  clean_user_data <- reactive({
+    req(input$user_file)
+    req(input$count_top)
+    req(input$count_left)
+    req(input$count_right)
+
+    dataaa <- df()
+    DataNew1 <- dataaa
+
+    top <- input$count_top
+    left <- input$count_left
+    right <- input$count_right
+    cat1 <- as.character(input$cat1)
+    cat2 <- as.character(input$cat2)
+    labs <- as.factor(input$lab)
+
+    colnames(DataNew1)[which(colnames(DataNew1) == top)] <- "top"
+    colnames(DataNew1)[which(colnames(DataNew1) == left)] <- "left"
+    colnames(DataNew1)[which(colnames(DataNew1) == right)] <- "right"
+    colnames(DataNew1)[which(colnames(DataNew1) == cat1)] <- "cat1"
+    colnames(DataNew1)[which(colnames(DataNew1) == cat2)] <- "cat2"
+    colnames(DataNew1)[which(colnames(DataNew1) == labs)] <- "lab"
+
+    return(DataNew1)
+  })
+
+
+  # first selection of model sizes
+  output$model_right <- renderUI({
+    req(input$model_left)
+
+    if (input$model_left == "2 mm") {
+      choice_right <- c("4 mm", "5 mm", "10 mm")
+
+      radioButtons("model_right_select",
+        "Right apex 'B' of the triangle",
+        choices = choice_right,
+        selected = "4 mm"
+      )
+    } else {
+      choice_right <- c("10 mm")
+
+      radioButtons("model_right_select",
+        "Right apex 'B' of the triangle",
+        choices = choice_right,
+        selected = "10 mm"
+      )
+    }
+  })
+
+
+  output$model_top <- renderUI({
+    req(input$model_right_select)
+
+    if (input$model_right_select == "4 mm") {
+      choice_top <- c("10 mm", "20 mm")
+
+      radioButtons("model_top_select",
+        "Top apex 'C' of the triangle",
+        choices = choice_top,
+        selected = "10 mm"
+      )
+    } else if (input$model_right_select == "5 mm") {
+      choice_top <- c("10 mm", "20 mm")
+
+      radioButtons("model_top_select",
+        "Top apex 'C' of the triangle",
+        choices = choice_top,
+        selected = "10 mm"
+      )
+    } else {
+      choice_top <- c("20 mm")
+
+      radioButtons("model_top_select",
+        "Top apex 'C' of the triangle",
+        choices = choice_top,
+        selected = "20 mm"
+      )
+    }
+  })
+
+
+  # second selection of dataset, raw material and knapping method
+  output$checkbox <- renderUI({
+    req(input$datafile)
+
+    choice <- unique(ternary_df[ternary_df$dataset %in% input$datafile, "raw_material"])
+
+    checkboxGroupInput("checkbox",
+      "Select raw material(s)",
+      choices = choice,
+      selected = "Flint"
+    )
+  })
+
+
+  output$checkbox2 <- renderUI({
+    req(input$datafile)
+    req(input$checkbox)
+
+    ternary_df_temp <- ternary_df %>%
+      filter(dataset == input$datafile & raw_material == input$checkbox)
+
+    choice2 <- unique(ternary_df_temp$method)
+
+    checkboxGroupInput("checkbox2",
+      "Select knapping method(s)",
+      choices = choice2,
+      selected = "Discoide"
+    )
+  })
+
+
+  # output$checkbox3 <- renderUI({
+  #   req(input$datafile)
+  #   req(input$checkbox)
+  #   if (req(input$checkbox2) == "Quina") {
+  #     ternary_df_temp2 <- ternary_df %>%
+  #       dplyr::filter(dataset == input$datafile & raw_material == input$checkbox) %>%
+  #       dplyr::filter(quina_phase != "NA")
+  #     choice3 <- unique(ternary_df_temp2$quina_phase)
+  #     checkboxGroupInput("checkbox3", "Select Quina phase(s)", choices = choice3, selected = character(0))
+  #   } else {
+  #     return()
+  #   }
+  # })
+
+
+  # output$table <- DT::renderDataTable({
+  #   ternary_df_t <- ternary_df %>%
+  #     dplyr::filter(dataset %in% input$datafile) %>%
+  #     dplyr::filter(raw_material %in% input$checkbox) %>%
+  #     dplyr::filter(method %in% input$checkbox2)
+  #   DT::datatable(ternary_df_t, options = list(lengthMenu = c(10, 20, 30, 50), pageWidth = 3))
+  # })
+  #
+
+  output$table <- DT::renderDataTable(
+    ternary_df_t <- ternary_df %>%
+      dplyr::filter(dataset %in% input$datafile) %>%
+      dplyr::filter(raw_material %in% input$checkbox) %>%
+      dplyr::filter(method %in% input$checkbox2) %>%
+      dplyr::select(c("dataset", "raw_material", "method", "knapper", "n2", "n4", "n5", "n10", "n20")) %>%
+      dplyr::mutate(across(where(is.numeric), round, 3)),
+    rownames = FALSE,
+    extensions = c("Buttons", "Scroller"),
+    options = list(
+      pageLength = nrow(ternary_df),
+      # lengthMenu = c(5, 10, 15, 20),
+      buttons = c("csv", "pdf", "copy"),
+      dom = "Bfrtip",
+      scrollX = 250
+    )
+  )
+
+
+  model_size <- reactive({
+    if (input$model_left == "2 mm" & input$model_right_select == "4 mm" & input$model_top_select == "10 mm") {
+      mod_size <- ternary_df %>%
+        dplyr::select(c("dataset", "raw_material", "method", "knapper", "n2", "n4_5", "nsup10")) %>%
+        dplyr::rename(left_triangle_apex = n2) %>%
+        dplyr::rename(right_triangle_apex = n4_5) %>%
+        dplyr::rename(top_triangle_apex = nsup10)
+    } else if (input$model_left == "2 mm" & input$model_right_select == "5 mm" & input$model_top_select == "10 mm") {
+      mod_size <- ternary_df %>%
+        dplyr::select(c("dataset", "raw_material", "method", "knapper", "n2_4", "n5", "nsup10")) %>%
+        dplyr::rename(left_triangle_apex = n2_4) %>%
+        dplyr::rename(right_triangle_apex = n5) %>%
+        dplyr::rename(top_triangle_apex = nsup10)
+    } else if (input$model_left == "2 mm" & input$model_right_select == "10 mm" & input$model_top_select == "20 mm") {
+      mod_size <- ternary_df %>%
+        dplyr::select(c("dataset", "raw_material", "method", "knapper", "n2_4_5", "n10", "n20")) %>%
+        dplyr::rename(left_triangle_apex = n2_4_5) %>%
+        dplyr::rename(right_triangle_apex = n10) %>%
+        dplyr::rename(top_triangle_apex = n20)
+    } else if (input$model_left == "2 mm" & input$model_right_select == "4 mm" & input$model_top_select == "20 mm") {
+      mod_size <- ternary_df %>%
+        dplyr::select(c("dataset", "raw_material", "method", "knapper", "n2", "n4_5_10", "n20")) %>%
+        dplyr::rename(left_triangle_apex = n2) %>%
+        dplyr::rename(right_triangle_apex = n4_5_10) %>%
+        dplyr::rename(top_triangle_apex = n20)
+    } else if (input$model_left == "2 mm" & input$model_right_select == "5 mm" & input$model_top_select == "20 mm") {
+      mod_size <- ternary_df %>%
+        dplyr::select(c("dataset", "raw_material", "method", "knapper", "n2_4", "n5_10", "n20")) %>%
+        dplyr::rename(left_triangle_apex = n2_4) %>%
+        dplyr::rename(right_triangle_apex = n5_10) %>%
+        dplyr::rename(top_triangle_apex = n20)
+    } else if (input$model_left == "4 mm" & input$model_right_select == "10 mm" & input$model_top_select == "20 mm") {
+      mod_size <- ternary_df %>%
+        dplyr::select(c("dataset", "raw_material", "method", "knapper", "n4_5", "n10", "n20")) %>%
+        dplyr::rename(left_triangle_apex = n4_5) %>%
+        dplyr::rename(right_triangle_apex = n10) %>%
+        dplyr::rename(top_triangle_apex = n20)
+    } else {
+      mod_size <- ternary_df %>%
+        dplyr::select(c("dataset", "raw_material", "method", "knapper", "n5", "n10", "n20")) %>%
+        dplyr::rename(left_triangle_apex = n5) %>%
+        dplyr::rename(right_triangle_apex = n10) %>%
+        dplyr::rename(top_triangle_apex = n20)
+    }
+    return(mod_size)
+  })
+
+
+  plot1 <- reactive({
+    req(input$user_file)
+    req(input$count_top)
+    req(input$count_left)
+    req(input$count_right)
+
+    # if (req(input$checkbox2) != "Quina") {
+    # ternary_df <- ternary_df %>%
+    #   dplyr::filter(dataset %in% input$datafile) %>%
+    #   dplyr::filter(raw_material %in% input$checkbox) %>%
+    #   dplyr::filter(method %in% input$checkbox2)
+    # } else {
+    #   ternary_df <- ternary_df %>%
+    #     dplyr::filter(dataset %in% input$datafile) %>%
+    #     dplyr::filter(raw_material %in% input$checkbox) %>%
+    #     dplyr::filter(method %in% input$checkbox2) %>%
+    #     dplyr::filter(quina_phase %in% input$checkbox3)
+    # }
+
+    tern_df <- model_size() %>%
+      dplyr::filter(dataset %in% input$datafile) %>%
+      dplyr::filter(raw_material %in% input$checkbox) %>%
+      dplyr::filter(method %in% input$checkbox2)
+
+
+    p <- ggtern::ggtern(data = tern_df, aes(left_triangle_apex, top_triangle_apex, right_triangle_apex)) +
+      ggplot2::geom_point(size = 1, fill = NA, colour = NA) +
+      ggtern::stat_confidence_tern(geom = "polygon", aes(fill = ..level.., alpha = 0.1), color = "white", size = 0.1) +
+      ggplot2::labs(title = "", fill = "Confidence", x = "A", y = "C", z = "B") +
+      ggplot2::theme(
+        tern.axis.line.T = element_line(color = "black", size = 1),
+        tern.axis.line.L = element_line(color = "black", size = 1),
+        tern.axis.line.R = element_line(color = "black", size = 1)
+      ) +
+      ggtern::theme_bw() +
+      ggplot2::guides(alpha = "none", color = "none", fill = "none", size = 0.5) +
+      ggtern::scale_T_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.5), labels = c("", "", ""), minor_breaks = NULL, size = 0.5) +
+      ggtern::scale_L_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.5), labels = c("", "", ""), minor_breaks = NULL, size = 0.5) +
+      ggtern::scale_R_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.5), labels = c("", "", ""), minor_breaks = NULL, size = 0.5) +
+      ggtern::geom_Tline(Tintercept = 0.5, colour = "black", size = 0.2) +
+      ggtern::geom_Lline(Lintercept = 0.5, colour = "black", size = 0.2) +
+      ggtern::geom_Rline(Rintercept = 0.5, colour = "black", size = 0.2)
+
+
+    if (input$facet == "0" & input$label == "no") {
+      p <- p + ggplot2::geom_point(
+        data = clean_user_data(),
+        aes(
+          x = left,
+          y = top,
+          z = right
+        ),
+        pch = 21,
+        size = 1,
+        fill = "black",
+        color = "darkgrey"
+      )
+    } else if (input$facet == "0" & input$label == "yes") {
+      p <- p + ggplot2::geom_point(
+        data = clean_user_data(),
+        aes(
+          x = left,
+          y = top,
+          z = right
+        ),
+        pch = 21,
+        size = 1,
+        fill = NA,
+        color = NA
+      ) +
+        ggtern::annotate(
+          geom = "text",
+          x = clean_user_data()$left,
+          y = clean_user_data()$top,
+          z = clean_user_data()$right,
+          label = clean_user_data()$lab,
+          size = 2
+        )
+    } else if (input$facet == "1" & input$label == "no") {
+      p <- p + ggplot2::geom_point(
+        data = clean_user_data(),
+        aes(
+          x = left,
+          y = top,
+          z = right
+        ),
+        pch = 21, size = 1,
+        fill = "black",
+        color = "#3D3D3D"
+      ) +
+        ggplot2::facet_wrap(~cat1) +
+        ggplot2::theme(strip.background = element_rect(fill = "white"))
+    } else if (input$facet == "1" & input$label == "yes") {
+      p <- p + ggplot2::geom_point(
+        data = clean_user_data(),
+        aes(
+          x = left,
+          y = top,
+          z = right
+        ),
+        pch = 21,
+        size = 1,
+        fill = NA,
+        color = NA
+      ) +
+        ggplot2::facet_wrap(~cat1) +
+        ggplot2::geom_text(
+          data = clean_user_data(),
+          label = clean_user_data()$lab,
+          size = 2
+        ) +
+        ggplot2::theme(strip.background = element_rect(fill = "white"))
+    } else if (input$facet == "2" & input$label == "no") {
+      p <- p + ggplot2::geom_point(
+        data = clean_user_data(),
+        aes(
+          x = left,
+          y = top,
+          z = right
+        ),
+        pch = 21,
+        size = 1,
+        fill = "black",
+        color = "#3D3D3D"
+      ) +
+        facet_grid(cat2 ~ cat1) +
+        ggplot2::theme(strip.background = element_rect(fill = "white"))
+    } else {
+      p <- p + ggplot2::geom_point(
+        data = clean_user_data(),
+        aes(
+          x = left,
+          y = top,
+          z = right
+        ),
+        pch = 21,
+        size = 1,
+        fill = NA,
+        color = NA
+      ) +
+        ggplot2::facet_grid(cat2 ~ cat1) +
+        ggplot2::geom_text(
+          data = clean_user_data(),
+          label = clean_user_data()$lab,
+          size = 2
+        ) +
+        ggplot2::theme(strip.background = element_rect(fill = "white"))
+    }
+
+    return(p)
+  })
+
+
+  plot2 <- reactive({
+    req(input$user_file)
+    req(input$count_top)
+    req(input$count_left)
+    req(input$count_right)
+
+    # if (req(input$checkbox2) != "Quina") {
+    # ternary_df <- ternary_df %>%
+    #   dplyr::filter(dataset %in% input$datafile) %>%
+    #   dplyr::filter(raw_material %in% input$checkbox) %>%
+    #   dplyr::filter(method %in% input$checkbox2)
+    # } else {
+    #   ternary_df <- ternary_df %>%
+    #     dplyr::filter(dataset %in% input$datafile) %>%
+    #     dplyr::filter(raw_material %in% input$checkbox) %>%
+    #     dplyr::filter(method %in% input$checkbox2) %>%
+    #     dplyr::filter(quina_phase %in% input$checkbox3)
+    # }
+
+    tern_df <- model_size() %>%
+      dplyr::filter(dataset %in% input$datafile) %>%
+      dplyr::filter(raw_material %in% input$checkbox) %>%
+      dplyr::filter(method %in% input$checkbox2)
+
+
+    p <- ggtern::ggtern(data = tern_df, aes(left_triangle_apex, top_triangle_apex, right_triangle_apex)) +
+      ggplot2::geom_point(size = 1, fill = NA, colour = NA) +
+      ggalt::geom_encircle(s_shape = 0.5, expand = 0) +
+      ggplot2::labs(title = "", x = "A", y = "C", z = "B") +
+      ggplot2::theme(
+        tern.axis.line.T = element_line(color = "black", size = 1),
+        tern.axis.line.L = element_line(color = "black", size = 1),
+        tern.axis.line.R = element_line(color = "black", size = 1)
+      ) +
+      ggtern::theme_bw() +
+      ggplot2::guides(alpha = "none", color = "none", fill = "none", size = 0.5) +
+      ggtern::scale_T_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.5), labels = c("", "", ""), minor_breaks = NULL, size = 0.5) +
+      ggtern::scale_L_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.5), labels = c("", "", ""), minor_breaks = NULL, size = 0.5) +
+      ggtern::scale_R_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.5), labels = c("", "", ""), minor_breaks = NULL, size = 0.5) +
+      ggtern::geom_Tline(Tintercept = 0.5, colour = "black", size = 0.2) +
+      ggtern::geom_Lline(Lintercept = 0.5, colour = "black", size = 0.2) +
+      ggtern::geom_Rline(Rintercept = 0.5, colour = "black", size = 0.2)
+
+
+    if (input$facet == "0" & input$label == "no") {
+      p <- p + ggplot2::geom_point(
+        data = clean_user_data(),
+        aes(
+          x = left,
+          y = top,
+          z = right
+        ),
+        pch = 21,
+        size = 1,
+        fill = "black",
+        color = "darkgrey"
+      )
+    } else if (input$facet == "0" & input$label == "yes") {
+      p <- p + ggplot2::geom_point(
+        data = clean_user_data(),
+        aes(
+          x = left,
+          y = top,
+          z = right
+        ),
+        pch = 21,
+        size = 1,
+        fill = NA,
+        color = NA
+      ) +
+        ggtern::annotate(
+          geom = "text",
+          x = clean_user_data()$left,
+          y = clean_user_data()$top,
+          z = clean_user_data()$right,
+          label = clean_user_data()$lab,
+          size = 2
+        )
+    } else if (input$facet == "1" & input$label == "no") {
+      p <- p + ggplot2::geom_point(
+        data = clean_user_data(),
+        aes(
+          x = left,
+          y = top,
+          z = right
+        ),
+        pch = 21, size = 1,
+        fill = "black",
+        color = "#3D3D3D"
+      ) +
+        ggplot2::facet_wrap(~cat1) +
+        ggplot2::theme(strip.background = element_rect(fill = "white"))
+    } else if (input$facet == "1" & input$label == "yes") {
+      p <- p + ggplot2::geom_point(
+        data = clean_user_data(),
+        aes(
+          x = left,
+          y = top,
+          z = right
+        ),
+        pch = 21,
+        size = 1,
+        fill = NA,
+        color = NA
+      ) +
+        ggplot2::facet_wrap(~cat1) +
+        ggplot2::geom_text(
+          data = clean_user_data(),
+          label = clean_user_data()$lab,
+          size = 2
+        ) +
+        ggplot2::theme(strip.background = element_rect(fill = "white"))
+    } else if (input$facet == "2" & input$label == "no") {
+      p <- p + ggplot2::geom_point(
+        data = clean_user_data(),
+        aes(
+          x = left,
+          y = top,
+          z = right
+        ),
+        pch = 21,
+        size = 1,
+        fill = "black",
+        color = "#3D3D3D"
+      ) +
+        facet_grid(cat2 ~ cat1) +
+        ggplot2::theme(strip.background = element_rect(fill = "white"))
+    } else {
+      p <- p + ggplot2::geom_point(
+        data = clean_user_data(),
+        aes(
+          x = left,
+          y = top,
+          z = right
+        ),
+        pch = 21,
+        size = 1,
+        fill = NA,
+        color = NA
+      ) +
+        ggplot2::facet_grid(cat2 ~ cat1) +
+        ggplot2::geom_text(
+          data = clean_user_data(),
+          label = clean_user_data()$lab,
+          size = 2
+        ) +
+        ggplot2::theme(strip.background = element_rect(fill = "white"))
+    }
+
+    return(p)
+  })
+
+
+  output$ternary <- renderPlot({
+    req(input$user_file)
+    req(input$count_top)
+    req(input$count_left)
+    req(input$count_right)
+
+    if (input$stat == "Mahalanobis") {
+      print(plot1())
+    } else {
+      print(plot2())
+    }
+  })
+
+
+  output$downloadPlot <- downloadHandler(
+    filename = function() {
+      paste("ternary_plot", input$file_format, sep = ".")
+    },
+    content = function(file) {
+      if (input$file_format == "png") {
+        png(file, width = 20, height = 20, units = "cm", res = 800)
+      } else if (input$file_format == "pdf") {
+        pdf(file)
+      } else {
+        jpeg(file, width = 20, height = 20, units = "cm", res = 800)
+      }
+      if (input$stat == "Mahalanobis") {
+        print(plot1())
+      } else {
+        print(plot2())
+      }
+      dev.off()
+    }
+  )
+}
+
+
+shinyApp(ui = ui, server = server)
